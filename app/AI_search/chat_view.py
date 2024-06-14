@@ -13,6 +13,7 @@ SOFTWARE.
 """
 
 import markdown
+from typing import List
 
 
 def list_to_html_string(input_list: list[str]):
@@ -29,7 +30,7 @@ def list_to_html_string(input_list: list[str]):
     return html_string
 
 
-def generate_html_code(question: str, answer: str): #, metadata: list[dict], context_history: list[str]):
+def generate_html_code(question: str, answer: str, images: List[str]): #, metadata: list[dict], context_history: list[str]):
     """Present the results in a nice-looking html"""
     html = """
     <!DOCTYPE html>
@@ -98,15 +99,12 @@ def generate_html_code(question: str, answer: str): #, metadata: list[dict], con
     html += f'<div class="message">{content}</div>\n'
 
     html += "<blockquote>"
-    statement = f"## Sources"
-    content = markdown.markdown(statement)
-    html += f'<div class="message">{content}</div>\n'
-    # for context, metadata_source in zip(context_history, metadata):
-    #     statement = f"Page {metadata_source['page_number']} - Document {metadata_source['source']}"
-    #     content = markdown.markdown(context)
-    #     html += '<details class="message"> <summary>{}</summary> <div class="content">{}</div> </details>\n'.format(
-    #         statement, content
-    #     )
+    for img in images:
+        image_html = f"""
+            <img src="data:image/png;base64, {img.decode('utf-8')}" style="width:100%;" />
+        """
+        html += f'<div class="message">{image_html}</div>\n'
+    
     html += "</blockquote>"
 
     html += """
