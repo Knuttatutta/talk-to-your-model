@@ -13,7 +13,7 @@ SOFTWARE.
 """
 
 import markdown
-from typing import List
+from typing import List, Dict
 
 
 def list_to_html_string(input_list: list[str]):
@@ -30,7 +30,9 @@ def list_to_html_string(input_list: list[str]):
     return html_string
 
 
-def generate_html_code(question: str, answer: str, images: List[str]): #, metadata: list[dict], context_history: list[str]):
+def generate_html_code(
+    question: str, messages: List[Dict[str, str]]
+):  # , metadata: list[dict], context_history: list[str]):
     """Present the results in a nice-looking html"""
     html = """
     <!DOCTYPE html>
@@ -93,19 +95,17 @@ def generate_html_code(question: str, answer: str, images: List[str]): #, metada
     <body>
         <div class="conversation">
     """
-    statement = f"## {question}\n" + answer
-    content = markdown.markdown(statement)
 
-    html += f'<div class="message">{content}</div>\n'
+    question_markdown = markdown.markdown(f"## {question}\n")
+    html += f'<div class="message">{question_markdown}</div>\n'
 
-    html += "<blockquote>"
-    for img in images:
-        image_html = f"""
-            <img src="data:image/png;base64, {img.decode('utf-8')}" style="width:100%;" />
-        """
-        html += f'<div class="message">{image_html}</div>\n'
-    
-    html += "</blockquote>"
+    for msg in messages:
+        if msg["type"] == "img":
+            html += "<blockquote>"
+            html += f'<div class="message"><img src="data:image/png;base64, {msg["value"].decode("utf-8")}" style="width:100%;" /></div>\n'
+            html += "</blockquote>"
+        else:
+            html += f'<div class="message">{markdown.markdown(msg["value"])}</div>\n'
 
     html += """
         </div>

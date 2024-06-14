@@ -37,29 +37,29 @@ from ..AI_search.retrieval_assistant import RetrievalAssistant
 from pathlib import Path
 from viktor.views import IFCView, IFCResult
 
-API_KEY = os.environ['API_KEY']
+API_KEY = os.environ["API_KEY"]
+
 
 def get_object_data_by_classes(file, class_type):
     objects_data = []
     objects = file.by_type(class_type)
     for obj in objects:
         obj_id = obj.id()
-        objects_data.append({
-            'ExpressID': obj.id(),
-            'GlobalId': obj.GlobalId,
-            'Class': obj.is_a(),
-            'PredefinedType': Element.get_predefined_type(obj),
-            'Name': obj.Name,
-            'Level': Element.get_container(obj).Name
-            if Element.get_container(obj)
-            else '',
-            'ObjectType': Element.get_type(obj).Name
-            if Element.get_type(obj)
-            else '',
-            'QuantitySets': Element.get_psets(obj, qtos_only=True),
-            'PropertySets': Element.get_psets(obj, psets_only=True),
-        })
+        objects_data.append(
+            {
+                "ExpressID": obj.id(),
+                "GlobalId": obj.GlobalId,
+                "Class": obj.is_a(),
+                "PredefinedType": Element.get_predefined_type(obj),
+                "Name": obj.Name,
+                "Level": Element.get_container(obj).Name if Element.get_container(obj) else "",
+                "ObjectType": Element.get_type(obj).Name if Element.get_type(obj) else "",
+                "QuantitySets": Element.get_psets(obj, qtos_only=True),
+                "PropertySets": Element.get_psets(obj, psets_only=True),
+            }
+        )
     return objects_data
+
 
 class Controller(ViktorController):
     """Controller class for Document searcher app"""
@@ -79,8 +79,8 @@ class Controller(ViktorController):
         temp_f.write(params.input.ifcfile.file.getvalue())
         model = ifcopenshell.open(Path(temp_f.name))
         data = get_object_data_by_classes(model, "IfcBuildingElement")
-        Path('temp').mkdir(exist_ok=True)
-        with open('temp/model_data.json', 'w+') as fp:
+        Path("temp").mkdir(exist_ok=True)
+        with open("temp/model_data.json", "w+") as fp:
             json.dump(data, fp)
 
         self.create_ai_assistant()
@@ -90,48 +90,40 @@ class Controller(ViktorController):
         client = OpenAI(api_key=API_KEY)
 
         assistant = client.beta.assistants.create(
-        instructions="You are an AI assistant that will allow users to talk to their data-rich models. In the responses where you're running code, do not provide any additional response besides the code and the output of the code. I will provide you with json files that contain data that were either made from Speckle or from IfcOpenShell and you need to be able to read this data and perform analysis on it.",
-        model="gpt-4o-2024-05-13",
-        tools=[{"type": "code_interpreter"}]
+            instructions="You are an AI assistant that will allow users to talk to their data-rich models. In the responses where you're running code, do not provide any additional response besides the code and the output of the code. I will provide you with json files that contain data that were either made from Speckle or from IfcOpenShell and you need to be able to read this data and perform analysis on it.",
+            model="gpt-4o-2024-05-13",
+            tools=[{"type": "code_interpreter"}],
         )
 
-        file = client.files.create(
-            file=open("temp/model_data.json", "rb"),
-            purpose='assistants'
-        )
+        file = client.files.create(file=open("temp/model_data.json", "rb"), purpose="assistants")
 
         thread = client.beta.threads.create(
             messages=[
                 {
                     "role": "user",
                     "content": "Here's some data in json format. It contains some data about a building, either structural, architectural or MEP-related.",
-                    "attachments": [
-                        {
-                        "file_id": file.id,
-                        "tools": [{"type": "code_interpreter"}]
-                        }
-                    ]
+                    "attachments": [{"file_id": file.id, "tools": [{"type": "code_interpreter"}]}],
                 }
             ]
         )
 
-        Storage().set(key="assistant_id", data=File.from_data(assistant.id), scope='entity')
-        Storage().set(key="thread_id", data=File.from_data(thread.id), scope='entity')
+        Storage().set(key="assistant_id", data=File.from_data(assistant.id), scope="entity")
+        Storage().set(key="thread_id", data=File.from_data(thread.id), scope="entity")
 
-    class EventHandler(AssistantEventHandler):    
+    class EventHandler(AssistantEventHandler):
         @override
         def on_text_created(self, text) -> None:
             print(f"\nassistant > ", end="", flush=True)
-            
+
         @override
         def on_text_delta(self, delta, snapshot):
             print(delta.value, end="", flush=True)
-            
+
         def on_tool_call_created(self, tool_call):
             print(f"\nassistant > {tool_call.type}\n", flush=True)
-        
+
         def on_tool_call_delta(self, delta, snapshot):
-            if delta.type == 'code_interpreter':
+            if delta.type == "code_interpreter":
                 if delta.code_interpreter.input:
                     print(delta.code_interpreter.input, end="", flush=True)
             if delta.code_interpreter.outputs:
@@ -139,11 +131,11 @@ class Controller(ViktorController):
                 for output in delta.code_interpreter.outputs:
                     if output.type == "logs":
                         print(f"\n{output.logs}", flush=True)
-        
-        # Then, we use the `stream` SDK helper 
-        # with the `EventHandler` class to create the Run 
+
+        # Then, we use the `stream` SDK helper
+        # with the `EventHandler` class to create the Run
         # and stream the response.
-        
+
     @WebView("Conversation", duration_guess=5)
     def conversation(self, params, **kwargs):
         """View for showing the questions, answers and sources to the user."""
@@ -166,28 +158,22 @@ class Controller(ViktorController):
 
         messages = client.beta.threads.messages.list(thread_id=thread.id)
 
-        new_file_ids = []
         new_messages = []
-        for msg in reversed(messages.data):
+        for msg in messages.data:
+            print(msg)
             for cont in msg.content:
-                if isinstance(cont, ImageFileContentBlock):
-                    new_file_ids.append(cont.image_file.file_id)
-                else:
-                    new_messages.append(cont.text.value)
-        # new_messages = reversed(new_messages)
-        
-        new_image_paths = []
-        images = []
-        for i, file_id in enumerate(new_file_ids):
-            img_response = client.files.with_raw_response.retrieve_content(file_id)
-            content = img_response.content
-            img64 = base64.b64encode(content)
-            images.append(img64)
 
-        answer = "\n\n\n".join(new_messages)
+                if isinstance(cont, ImageFileContentBlock):
+                    img_response = client.files.with_raw_response.retrieve_content(cont.image_file.file_id)
+                    content = img_response.content
+                    img64 = base64.b64encode(content)
+                    new_messages.append({"type": "img", "value": img64})
+                else:
+                    new_messages.append({"type": "text", "value": cont.text.value})
 
         html = generate_html_code(
-            params.input.question, answer, images,#, retrieval_assistant.metadata_list, retrieval_assistant.context_list
+            params.input.question,
+            new_messages,
         )
 
         return WebResult(html=html)
