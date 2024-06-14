@@ -101,7 +101,7 @@ def generate_html_code(question: str, answer: str, images: List[str]): #, metada
     html += "<blockquote>"
     for img in images:
         image_html = f"""
-            <img src="data:image/png;base64, {img.decode('utf-8')}" style="width:100%;" />
+            <img src="data:image/png;base64, {img.decode('utf-8')}" style="width:50%;" />
         """
         html += f'<div class="message">{image_html}</div>\n'
     

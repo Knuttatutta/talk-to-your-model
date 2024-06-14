@@ -90,7 +90,10 @@ class Controller(ViktorController):
         client = OpenAI(api_key=API_KEY)
 
         assistant = client.beta.assistants.create(
-        instructions="You are an AI assistant that will allow users to talk to their data-rich models. In the responses where you're running code, do not provide any additional response besides the code and the output of the code. I will provide you with json files that contain data that were either made from Speckle or from IfcOpenShell and you need to be able to read this data and perform analysis on it.",
+        instructions="You are an AI assistant that will allow users to talk to their data-rich models. "  
+                    + "In the responses where you're running code, do not provide any additional response besides the code and the output of the code, and also always run the code." 
+                    + "I will provide you with json files that contain data that were either made from Speckle or from IfcOpenShell and you need to be able to read this data and perform analysis on it." 
+                    + "You will need to extract the properties and attributes from the various objects that are provided to learn about them and what can be analysed about them.",
         model="gpt-4o-2024-05-13",
         tools=[{"type": "code_interpreter"}]
         )
