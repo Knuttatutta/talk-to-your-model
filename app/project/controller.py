@@ -79,6 +79,7 @@ class Controller(ViktorController):
         temp_f.write(params.input.ifcfile.file.getvalue())
         model = ifcopenshell.open(Path(temp_f.name))
         data = get_object_data_by_classes(model, "IfcBuildingElement")
+        Path('temp').mkdir(exist_ok=True)
         with open('temp/model_data.json', 'w+') as fp:
             json.dump(data, fp)
 
@@ -167,13 +168,13 @@ class Controller(ViktorController):
 
         new_file_ids = []
         new_messages = []
-        for msg in messages.data:
+        for msg in reversed(messages.data):
             for cont in msg.content:
                 if isinstance(cont, ImageFileContentBlock):
                     new_file_ids.append(cont.image_file.file_id)
                 else:
                     new_messages.append(cont.text.value)
-        new_messages = reversed(new_messages)
+        # new_messages = reversed(new_messages)
         
         new_image_paths = []
         images = []
@@ -182,16 +183,13 @@ class Controller(ViktorController):
             content = img_response.content
             img64 = base64.b64encode(content)
             images.append(img64)
-            # img_path = f'temp/image_{i}.png'
-            # new_image_paths.append(img_path)
-            # with open(img_path, 'wb') as f:
-            #     f.write(content)
 
         answer = "\n\n\n".join(new_messages)
 
         html = generate_html_code(
             params.input.question, answer, images,#, retrieval_assistant.metadata_list, retrieval_assistant.context_list
         )
+
         return WebResult(html=html)
 
     @IFCView("IFC view", duration_guess=1)
