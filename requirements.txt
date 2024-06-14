@@ -1,0 +1,8 @@
+viktor==14.6.1
+langchain
+openai
+tiktoken==0.4.0
+scipy==1.10.0
+Markdown==3.4.4
+pypdf==3.17.1
+ifcopenshell==0.7.0.240521
