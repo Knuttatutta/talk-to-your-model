@@ -139,6 +139,10 @@ class Controller(ViktorController):
         # with the `EventHandler` class to create the Run
         # and stream the response.
 
+    @IFCView("IFC view", duration_guess=1)
+    def get_ifc_view(self, params, **kwargs):
+        return IFCResult(params.input.ifcfile)
+
     @WebView("Conversation", duration_guess=5)
     def conversation(self, params, **kwargs):
         """View for showing the questions, answers and sources to the user."""
@@ -180,7 +184,3 @@ class Controller(ViktorController):
         )
 
         return WebResult(html=html)
-
-    @IFCView("IFC view", duration_guess=1)
-    def get_ifc_view(self, params, **kwargs):
-        return IFCResult(params.input.ifcfile)

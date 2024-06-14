@@ -27,18 +27,16 @@ class Parametrization(ViktorParametrization):
 
     input = Tab("Input")
     input.welcome_text = Text(
-        "# IFC chatter  \n"
-        "Welcome to the VIKTOR document searcher. "
-        "With this app, you can easily find information in your IFC documents. Your question will be answered using "
-        "the power of AI."
+        "# Talk to You Model  \n"
+        "Welcome to the chatbot that allows you to talk straight to your model to learn about it!. "
     )
-    input.text_step_1 = Text("**Step 1**: Upload your .IFC documents")
+    input.text_step_1 = Text("**Step 1**: Upload your model")
     input.ifcfile = FileField("ifcfile", description="Upload your .IFC file here", flex=100)
-    input.text_step_2 = Text("**Step 2**: Submit your documents by clicking on the button below")
-    input.confirm_model_button = SetParamsButton("Confirm model", "push_model", flex=45, longpoll=True)
+    input.text_step_2 = Text("**Step 2**: Push the model to the AI")
+    input.confirm_model_button = SetParamsButton("Push model", "push_model", flex=45, longpoll=True)
     input.question = TextAreaField(
-        "**Step 3:** Ask your question here",
+        "**Step 3:** Chat with your building here:",
         flex=100,
         description="Any language is allowed, the app will answer in the same language as your question.",
     )
-    input.step_4_text = Text("**Step 4:** Get your result by clicking 'Update' in the lower-right corner of this app.")
+    input.step_4_text = Text("**Step 4:** Send the prompt by clicking Update in the bottom-right corner.")
