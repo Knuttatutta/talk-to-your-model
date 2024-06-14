@@ -76,7 +76,7 @@ class Controller(ViktorController):
         temp_f.write(params.input.ifcfile.file.getvalue())
         model = ifcopenshell.open(Path(temp_f.name))
         data = get_object_data_by_classes(model, "IfcBuildingElement")
-        with open('model_data.json', 'w+') as fp:
+        with open('temp/model_data.json', 'w+') as fp:
             json.dump(data, fp)
 
         self.create_ai_assistant()
@@ -92,7 +92,7 @@ class Controller(ViktorController):
         )
 
         file = client.files.create(
-            file=open("model_data.json", "rb"),
+            file=open("temp/model_data.json", "rb"),
             purpose='assistants'
         )
 
@@ -174,7 +174,7 @@ class Controller(ViktorController):
         for i, file_id in enumerate(new_file_ids):
             img_response = client.files.with_raw_response.retrieve_content(file_id)
             content = img_response.content
-            with open(f'image_{i}.png', 'wb') as f:
+            with open(f'temp/image_{i}.png', 'wb') as f:
                 f.write(content)
 
         answer = "\n".join(new_messages)

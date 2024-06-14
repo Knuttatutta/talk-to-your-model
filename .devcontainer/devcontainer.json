@@ -27,5 +27,8 @@
 		"VIKTOR_CREDENTIALS": {
 			"description": "cis4xOGZXt2lsvavn3rBd33ahCKl3EAnEbRXwkOgq8lv1greF4nA6vBzOaHS"
 		}
+	},
+	"remoteEnv": {
+		"API_KEY": "<FILL API_KEY HERE>"
 	}
 }
