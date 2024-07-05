@@ -25,7 +25,7 @@
 	},
 	"secrets": {
 		"VIKTOR_CREDENTIALS": {
-			"description": "rbouE91dPwsmXMCUFm0T24NnthBkc7Byz4nwriy5vDrjJkrUmjyKKpDcrRQi"
+			"description": "Paste the token obtained during the onboarding flow."
 		}
 	}
 }
